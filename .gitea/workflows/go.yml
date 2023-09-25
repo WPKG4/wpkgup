@@ -1,0 +1,31 @@
+name: Build wpkgup
+run-name: Build wpkgup
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go 1.19
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.19
+      
+      - name: Build
+        run: make
+
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: wpkg3
+      #     path: ./build/wpkg3
+      #     retention-days: 1
+
+      - name: List files in the repository
+        run: |
+          ls ${{ gitea.workspace }}/build
+      

@@ -1,3 +1,3 @@
-# wpkg3-wpkgup
+# wpkgup
 
 WPKG Update manager
