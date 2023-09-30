@@ -23,3 +23,6 @@ go.work
 
 # Executable
 wpkgup
+
+# Workdir
+workdir
