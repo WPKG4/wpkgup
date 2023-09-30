@@ -2,21 +2,17 @@ FROM golang:latest AS build
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-
-RUN go mod download
-
 COPY . .
 
-RUN go build -o wpkgup .
+RUN make build
 
-FROM alpine:latest
+FROM debian:sid-slim
 
 WORKDIR /app
 
-COPY --from=build /app/wpkgup .
+COPY --from=build /app/wpkgup /app
 
 EXPOSE 8080
 
 VOLUME /app/data
-CMD ["./wpkgup","server","-w","/app/data"]
+ENTRYPOINT ["./wpkgup","server","-w","/app/data"]
