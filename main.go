@@ -25,7 +25,7 @@ func help() {
 func startServer(ip string, port int) {
 	r := gin.Default()
 	server.InitControllers(r)
-	fmt.Println("Starting HTTP Server at " + ip + ":" + strconv.Itoa(port))
+	fmt.Println("Starting HTTP Server at http://" + ip + ":" + strconv.Itoa(port))
 	r.Run(ip + ":" + strconv.Itoa(port))
 }
 

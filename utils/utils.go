@@ -13,7 +13,18 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/gabriel-vasile/mimetype"
 )
+
+func IsDir(path string) bool {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+
+	return fileInfo.IsDir()
+}
 
 func Copy(src string, dst string) error {
 	// Read all content of src to data, may cause OOM for a large file.
@@ -27,6 +38,24 @@ func Copy(src string, dst string) error {
 		return err
 	}
 	return nil
+}
+
+func GetMimeType(filePath string) (string, error) {
+	// file, err := os.Open(filePath)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// defer file.Close()
+
+	// buffer := make([]byte, 100000)
+	// _, err = file.Read(buffer)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	// mimeType := http.DetectContentType(buffer)
+	mtype, err := mimetype.DetectFile(filePath)
+	return mtype.String(), err
 }
 
 func FileExists(path string) bool {
