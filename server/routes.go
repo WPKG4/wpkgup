@@ -28,9 +28,9 @@ func Files(c *gin.Context) {
 
 	path := c.Param("content")
 
-	list := []Href{}
+	var list []Href
 
-	file := filepath.Join(config.WorkDir, config.CONTENT_DIR, path)
+	file := filepath.Join(config.WorkDir, config.ContentDir, path)
 
 	if utils.IsDir(file) {
 		files, err := ioutil.ReadDir(file)
@@ -46,7 +46,7 @@ func Files(c *gin.Context) {
 		}
 
 		c.Header("Content-Type", "text/html")
-		c.String(http.StatusOK, ProcessTemplate("file", FILES_TEMPLATE, gin.H{
+		c.String(http.StatusOK, ProcessTemplate("file", FilesTemplate, gin.H{
 			"path": path,
 			"list": list,
 		}))
@@ -113,7 +113,7 @@ func GetUpdateJson(c *gin.Context) {
 	Os := c.Param("os")
 	arch := c.Param("arch")
 
-	path := filepath.Join(config.WorkDir, config.CONTENT_DIR, component, channel, Os, arch, "version.json")
+	path := filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, "version.json")
 
 	if !utils.FileExists(path) {
 		c.JSON(404, gin.H{"error": "INVALID_COMPONENT"})
@@ -140,9 +140,9 @@ func UploadBinary(c *gin.Context) {
 	arch := c.Param("arch")
 
 	//Process path
-	savepath := filepath.Join(config.WorkDir, config.CONTENT_DIR, component, channel, Os, arch, version)
+	savePath := filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, version)
 
-	if err := os.MkdirAll(savepath, os.ModeSticky|os.ModePerm); err != nil {
+	if err := os.MkdirAll(savePath, os.ModeSticky|os.ModePerm); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
@@ -155,14 +155,14 @@ func UploadBinary(c *gin.Context) {
 	}
 	log.Println("Receiving new binary for component " + component + " | channel: " + channel + " version: " + version)
 
-	err = c.SaveUploadedFile(file, filepath.Join(savepath, file.Filename))
+	err = c.SaveUploadedFile(file, filepath.Join(savePath, file.Filename))
 	log.Println("Saving " + file.Filename + "...")
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	checksum, err := utils.Sha256File(filepath.Join(savepath, file.Filename))
+	checksum, err := utils.Sha256File(filepath.Join(savePath, file.Filename))
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -175,7 +175,7 @@ func UploadBinary(c *gin.Context) {
 	}
 
 	//Generate JSON
-	err = GenerateJson(filepath.Join(config.WorkDir, config.CONTENT_DIR, component, channel, Os, arch, "version.json"), jsonMap)
+	err = GenerateJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, "version.json"), jsonMap)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

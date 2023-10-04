@@ -26,3 +26,6 @@ wpkgup
 
 # Workdir
 workdir
+
+# GoLand
+.idea

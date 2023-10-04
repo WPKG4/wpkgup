@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const FILES_TEMPLATE = `<!DOCTYPE html>
+const FilesTemplate = `<!DOCTYPE html>
 <head>
 <title>WpkgUp File Server | {{.path}}</title>
 </head>

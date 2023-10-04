@@ -1,3 +1,3 @@
 package config
 
-const CONTENT_DIR = "content"
+const ContentDir = "content"

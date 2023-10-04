@@ -14,7 +14,6 @@ var WorkDir string
 func FindAppDataFolder(folderName string) string {
 	var appDataFolder string
 
-	// Pobierz ścieżkę do folderu appdata na różnych systemach
 	switch Os := runtime.GOOS; Os {
 	case "windows":
 		appDataFolder = os.Getenv("APPDATA")
