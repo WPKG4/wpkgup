@@ -2,6 +2,7 @@ package utils
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"compress/gzip"
 	"crypto/sha256"
@@ -16,6 +17,23 @@ import (
 
 	"github.com/gabriel-vasile/mimetype"
 )
+
+func ScanDefault(defaultInput string, required bool) string {
+	var input string
+
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+
+	if text := strings.TrimSpace(scanner.Text()); text != "" {
+		input = text
+	} else if required {
+		fmt.Print("Value must be set: ")
+		return ScanDefault(defaultInput, required)
+	} else {
+		input = defaultInput
+	}
+	return input
+}
 
 func IsDir(path string) bool {
 	fileInfo, err := os.Stat(path)

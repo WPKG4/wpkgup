@@ -34,7 +34,12 @@ func InitDirs(workdir string) {
 			return
 		}
 		//create directories
-		if err := os.MkdirAll(filepath.Join(workdir, "content"), os.ModeSticky|os.ModePerm); err != nil {
+		if err := os.MkdirAll(filepath.Join(workdir, ContentDir), os.ModeSticky|os.ModePerm); err != nil {
+			fmt.Println("Error creating directories:", err)
+			return
+		}
+		//create directories
+		if err := os.MkdirAll(filepath.Join(workdir, KeyringDir), os.ModeSticky|os.ModePerm); err != nil {
 			fmt.Println("Error creating directories:", err)
 			return
 		}
