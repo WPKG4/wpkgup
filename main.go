@@ -85,9 +85,10 @@ func main() {
 	signBinaryFlag = flag.NewFlagSet("sign-binary", flag.ExitOnError)
 	signBinaryFlag.StringVar(&workDir, "w", config.FindAppDataFolder("wpkgup2"), "Server workdir")
 
-	uploadKeysFlag = flag.NewFlagSet("upload-binary", flag.ExitOnError)
-	uploadKeysFlag.StringVar(&address, "i", "0.0.0.0:8080", "Server Address")
-	uploadKeysFlag.StringVar(&workDir, "w", config.FindAppDataFolder("wpkgup2"), "Server workdir")
+	uploadBinaryFlag = flag.NewFlagSet("upload-binary", flag.ExitOnError)
+	uploadBinaryFlag.StringVar(&address, "i", "0.0.0.0:8080", "Server Address")
+	uploadBinaryFlag.StringVar(&workDir, "w", config.FindAppDataFolder("wpkgup2"), "Server workdir")
+	uploadBinaryFlag.StringVar(&keyString, "k", "", "Private key to import")
 
 	println("WpkgUp2", config.Version)
 
@@ -196,6 +197,7 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		fmt.Println("Keys uploaded successfully!")
 	case "sign-binary":
 		signBinaryFlag.Parse(os.Args[2:])
 		config.InitDirs(workDir)
@@ -220,8 +222,37 @@ func main() {
 			os.Exit(1)
 		}
 	case "upload-binary":
-		uploadBinaryFlag.Parse(os.Args[2:])
+		uploadBinaryFlag.Parse(os.Args[7:])
 		config.InitDirs(workDir)
+
+		component := os.Args[2]
+		channel := os.Args[3]
+		Os := os.Args[4]
+		arch := os.Args[5]
+		version := os.Args[6]
+		filename := os.Args[7]
+
+		var privateKey *ecdsa.PrivateKey
+		var err error
+
+		fmt.Println(keyString)
+
+		if keyString != "" {
+			privateKey, err = crypto.ParsePrivateKeyFromString(keyString)
+		} else {
+			privateKey, err = crypto.ParsePrivateKeyFromFile(filepath.Join(config.WorkDir, config.KeyringDir, "private.pem"))
+		}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		err = client.UploadBinary(component, channel, Os, arch, version, address, filename, privateKey)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println("Binary uploaded successfully!")
 	case "--help":
 		help(os.Args[0])
 	}

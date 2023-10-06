@@ -194,8 +194,8 @@ func UploadBinary(c *gin.Context) {
 			continue
 		}
 
-		log.Println("Verifying for ", key, " ", verifyResult)
 		if verifyResult {
+			log.Println("Verified for ", key)
 			verified = true
 			break
 		}
@@ -221,9 +221,10 @@ func UploadBinary(c *gin.Context) {
 			return
 		}
 
-		c.Status(200)
+		c.Status(http.StatusCreated)
 	} else {
 		log.Println("Sign is not valid, removing files...")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Sign is not valid"})
 	}
 }
 
