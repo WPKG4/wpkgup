@@ -18,7 +18,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
-func ScanDefault(defaultInput string, required bool) string {
+func ScanDefault(defaultInput string) string {
 	var input string
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -26,12 +26,25 @@ func ScanDefault(defaultInput string, required bool) string {
 
 	if text := strings.TrimSpace(scanner.Text()); text != "" {
 		input = text
-	} else if required {
-		fmt.Print("Value must be set: ")
-		return ScanDefault(defaultInput, required)
 	} else {
 		input = defaultInput
 	}
+	return input
+}
+
+func ScanRequired() string {
+	var input string
+
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+
+	if text := strings.TrimSpace(scanner.Text()); text != "" {
+		input = text
+	} else {
+		fmt.Print("Value must be set: ")
+		return ScanRequired()
+	}
+
 	return input
 }
 
@@ -115,6 +128,20 @@ func Sha256File(path string) (string, error) {
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
+}
+
+func Sha256FileByte(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return nil, err
+	}
+	return h.Sum(nil), nil
 }
 
 func Sha256(buff []byte) (string, error) {

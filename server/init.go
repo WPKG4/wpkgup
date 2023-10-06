@@ -21,4 +21,5 @@ func InitControllers(r *gin.Engine) {
 
 	r.GET("/", Index)
 	r.GET("/files/*content", Files)
+	r.PUT("/api/keys/add", AddPublicKey)
 }
