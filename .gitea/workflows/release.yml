@@ -26,16 +26,16 @@ jobs:
         with:
           go-version: 1.19
 
-      # - name: Build WpkgUp boot build
-      #   run: |
-      #     GOOS=linux GOARCH=arm64 VERSION=1.0.0-boot make build
-      #     mv wpkgup wpkgup-uploader
-      #     chmod +x wpkgup-uploader
-
-      - name: Download WpkgUp to upload
+      - name: Build WpkgUp boot build
         run: |
-          curl https://cdn.wpkg.dev/api/wpkgup/stable/linux/arm64/latest/getbinary -o wpkgup-uploader
+          GOOS=linux GOARCH=arm64 VERSION=1.0.0-boot make build
+          mv wpkgup wpkgup-uploader
           chmod +x wpkgup-uploader
+
+      # - name: Download WpkgUp to upload
+      #   run: |
+      #     curl https://cdn.wpkg.dev/api/wpkgup/stable/linux/arm64/latest/getbinary -o wpkgup-uploader
+      #     chmod +x wpkgup-uploader
 
       - name: Build for Linux x64
         run: |
@@ -82,5 +82,4 @@ jobs:
             ## Changes
             ## Bug Fixes
             ## Internal Changes
-          # files: |
-          #   ./wpkgup
+          files:
