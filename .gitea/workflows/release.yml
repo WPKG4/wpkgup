@@ -51,7 +51,7 @@ jobs:
 
       - name: Build for Windows x64
         run: |
-          env GOOS=windows GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} make build 
+          env GOOS=windows GOARCH=amd64 VERSION=${{ steps.tag_name.outputs.version }} make build 
           mv wpkgup.exe wpkgup-windows-x64.exe
           file wpkgup-windows-x64.exe
 

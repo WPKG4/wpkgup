@@ -143,8 +143,10 @@ func GetBinary(c *gin.Context) {
 	var jsonMap VersionJson
 	var err error
 
+	log.Println("Requesting binary for component " + component + " | channel: " + channel + " | os: " + Os + " | arch: " + arch + " | version: " + version)
 	//Process path
 	if version == "latest" {
+		log.Println("Version is latest")
 		jsonMap, err = ReadVersionJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, "version.json"))
 	} else {
 		jsonMap, err = ReadVersionJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, version, "version.json"))
