@@ -17,6 +17,7 @@ func StartServer(ip string, port int) {
 func InitControllers(r *gin.Engine) {
 	r.NoRoute(NoRoute)
 	r.GET("/api/:component/:channel/:os/:arch/json", GetUpdateJson)
+	r.GET("/api/:component/:channel/:os/:arch/:version/getbinary", GetBinary)
 	r.POST("/api/:component/:channel/:os/:arch/:version/uploadbinary", UploadBinary)
 
 	r.GET("/", Index)

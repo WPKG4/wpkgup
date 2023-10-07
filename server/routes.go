@@ -131,6 +131,34 @@ func GetUpdateJson(c *gin.Context) {
 	c.String(http.StatusOK, json)
 }
 
+func GetBinary(c *gin.Context) {
+	log.SetPrefix("[API] ")
+
+	component := c.Param("component")
+	channel := c.Param("channel")
+	Os := c.Param("os")
+	version := c.Param("version")
+	arch := c.Param("arch")
+
+	var jsonMap VersionJson
+	var err error
+
+	//Process path
+	if version == "latest" {
+		jsonMap, err = ReadVersionJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, "version.json"))
+	} else {
+		jsonMap, err = ReadVersionJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, version, "version.json"))
+	}
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	binaryPath := filepath.Join(config.WorkDir, config.ContentDir, jsonMap.Path)
+
+	c.FileAttachment(filepath.Base(binaryPath), binaryPath)
+}
+
 func UploadBinary(c *gin.Context) {
 	log.SetPrefix("[API] ")
 
@@ -211,11 +239,17 @@ func UploadBinary(c *gin.Context) {
 		jsonMap := VersionJson{
 			Version:  version,
 			Checksum: checksum,
-			Url:      "/" + component + "/" + channel + "/" + Os + "/" + arch + "/" + version + "/" + file.Filename,
+			Path:     "/" + component + "/" + channel + "/" + Os + "/" + arch + "/" + version + "/" + file.Filename,
 		}
 
 		//Generate JSON
-		err = GenerateJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, "version.json"), jsonMap)
+		err = GenerateVersionJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, "version.json"), jsonMap)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		//Generate JSON in version folder
+		err = GenerateVersionJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, version, "version.json"), jsonMap)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
