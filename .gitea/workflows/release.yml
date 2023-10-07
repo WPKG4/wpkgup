@@ -28,7 +28,7 @@ jobs:
 
       - name: Build WpkgUp boot build
         run: |
-          GOOS=linux GOARCH=arm64 VERSION=1.0.0-boot make build
+          make build GOOS=linux GOARCH=amd64 VERSION=1.0.0-boot 
           mv wpkgup wpkgup-uploader
           chmod +x wpkgup-uploader
 
@@ -39,17 +39,17 @@ jobs:
 
       - name: Build for Linux x64
         run: |
-          GOOS=linux GOARCH=amd64 VERSION=${{ steps.tag_name.outputs.version }} make build
+          make build GOOS=linux GOARCH=amd64 VERSION=${{ steps.tag_name.outputs.version }} 
           mv wpkgup wpkgup-linux-x64
 
       - name: Build for Linux ARM64
         run: |
-          GOOS=linux GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} make build
+          make build GOOS=linux GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} 
           mv wpkgup wpkgup-linux-arm64
 
       - name: Build for Windows x64
         run: |
-          GOOS=windows GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} make build
+          make build GOOS=windows GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} 
           mv wpkgup.exe wpkgup-windows-x64.exe
 
       - name: Upload for Linux x64
@@ -70,16 +70,16 @@ jobs:
           ./wpkgup-uploader upload-binary wpkgup stable windows x64 ${{ steps.tag_name.outputs.version }} wpkgup.exe -i ${{ env.API_URL }} -k ${{ secrets.WPKGUP_KEY }}
           rm wpkgup.exe
 
-      - name: Upload release files
-        uses: https://gitea.com/actions/release-action@main
-        with:
-          api_key: '${{secrets.RELEASE_TOKEN}}'
-          draft: true
-          body: |
-            <!-- Write summary here -->
-            ---
-            ## Features
-            ## Changes
-            ## Bug Fixes
-            ## Internal Changes
-          files:
+      # - name: Upload release files
+      #   uses: https://gitea.com/actions/release-action@main
+      #   with:
+      #     api_key: '${{secrets.RELEASE_TOKEN}}'
+      #     draft: true
+      #     body: |
+      #       <!-- Write summary here -->
+      #       ---
+      #       ## Features
+      #       ## Changes
+      #       ## Bug Fixes
+      #       ## Internal Changes
+      #     files:
