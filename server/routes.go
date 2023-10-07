@@ -158,7 +158,7 @@ func GetBinary(c *gin.Context) {
 	}
 	binaryPath := filepath.Join(config.WorkDir, config.ContentDir, jsonMap.Path)
 
-	c.FileAttachment(filepath.Base(binaryPath), binaryPath)
+	c.File(binaryPath)
 }
 
 func UploadBinary(c *gin.Context) {
