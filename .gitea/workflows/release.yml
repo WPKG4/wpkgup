@@ -5,6 +5,9 @@ on:
     tags:
       - 'v**'
 
+env:
+  API_URL: https://cdn.wpkg.dev
+
 jobs:
   build:
     name: Build & Upload
@@ -52,19 +55,19 @@ jobs:
       - name: Upload for Linux x64
         run: |
           mv wpkgup-linux-x64 wpkgup
-          ./wpkgup-uploader upload-binary wpkgup stable linux x64 ${{ steps.tag_name.outputs.version }} wpkgup -k ${{ secrets.WPKGUP_KEY }}
+          ./wpkgup-uploader upload-binary wpkgup stable linux x64 ${{ steps.tag_name.outputs.version }} wpkgup -i ${{ env.API_URL }} -k ${{ secrets.WPKGUP_KEY }}
           rm wpkgup
 
       - name: Upload for Linux ARM64
         run: |
           mv wpkgup-linux-arm64 wpkgup
-          ./wpkgup-uploader upload-binary wpkgup stable linux arm64 ${{ steps.tag_name.outputs.version }} wpkgup -k ${{ secrets.WPKGUP_KEY }}
+          ./wpkgup-uploader upload-binary wpkgup stable linux arm64 ${{ steps.tag_name.outputs.version }} wpkgup -i ${{ env.API_URL }} -k ${{ secrets.WPKGUP_KEY }}
           rm wpkgup
 
       - name: Upload for Windows x64
         run: |
           mv wpkgup-windows-x64.exe wpkgup.exe
-          ./wpkgup-uploader upload-binary wpkgup stable linux x64 ${{ steps.tag_name.outputs.version }} wpkgup.exe -k ${{ secrets.WPKGUP_KEY }}
+          ./wpkgup-uploader upload-binary wpkgup stable linux x64 ${{ steps.tag_name.outputs.version }} wpkgup.exe -i ${{ env.API_URL }} -k ${{ secrets.WPKGUP_KEY }}
           rm wpkgup.exe
 
       - name: Upload release files
