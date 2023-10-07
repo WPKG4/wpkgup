@@ -169,9 +169,8 @@ func UploadBinary(c *gin.Context) {
 	arch := c.Param("arch")
 
 	//Process path
-	savePath := filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, version)
-
-	if err := os.MkdirAll(savePath, os.ModeSticky|os.ModePerm); err != nil {
+	tempSavePath, err := os.MkdirTemp("", "wpkgup2_*")
+	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
@@ -188,7 +187,7 @@ func UploadBinary(c *gin.Context) {
 	log.Println("Receiving new binary for component " + component + " | channel: " + channel + " | version: " + version)
 
 	log.Println("Saving signature...")
-	signaturePath := filepath.Join(savePath, "signature.der")
+	signaturePath := filepath.Join(tempSavePath, "signature.der")
 	err = c.SaveUploadedFile(sign, signaturePath)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -196,7 +195,7 @@ func UploadBinary(c *gin.Context) {
 	}
 
 	log.Println("Saving binary...")
-	binaryPath := filepath.Join(savePath, file.Filename)
+	binaryPath := filepath.Join(tempSavePath, file.Filename)
 	err = c.SaveUploadedFile(file, binaryPath)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -230,8 +229,33 @@ func UploadBinary(c *gin.Context) {
 	}
 
 	if verified {
-		checksum, err := utils.Sha256File(filepath.Join(savePath, file.Filename))
+		//save to content dir
+		savePath := filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, version)
+
+		if err := os.MkdirAll(savePath, os.ModeSticky|os.ModePerm); err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		//copy binary
+		err := utils.CopyFile(binaryPath, filepath.Join(savePath, file.Filename))
 		if err != nil {
+			log.Println("Copy binary error:", err)
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		//copy signature
+		err = utils.CopyFile(signaturePath, filepath.Join(savePath, "signature.der"))
+		if err != nil {
+			log.Println("Copy signature error:", err)
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		//generate checksum
+		checksum, err := utils.Sha256File(filepath.Join(tempSavePath, file.Filename))
+		if err != nil {
+			log.Println("Checksum error:", err)
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
@@ -245,25 +269,35 @@ func UploadBinary(c *gin.Context) {
 		//Generate JSON
 		err = GenerateVersionJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, "version.json"), jsonMap)
 		if err != nil {
+			log.Println("JSON generate error:", err)
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
 		//Generate JSON in version folder
-		err = GenerateVersionJson(filepath.Join(config.WorkDir, config.ContentDir, component, channel, Os, arch, version, "version.json"), jsonMap)
+		err = GenerateVersionJson(filepath.Join(savePath, "version.json"), jsonMap)
 		if err != nil {
+			log.Println("JSON generate error:", err)
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		//Removing temp files
+		err = os.RemoveAll(tempSavePath)
+		if err != nil {
+			log.Println("Remove temp error:", err)
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
 
 		c.Status(http.StatusCreated)
 	} else {
-		log.Println("Sign is not valid, removing files...")
-		err := os.RemoveAll(savePath)
+		log.Println("Signature verification failed, removing files...")
+		err := os.RemoveAll(tempSavePath)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Sign is not valid"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Signature verification failed valid"})
 		}
 	}
 }

@@ -50,6 +50,21 @@ func IsDir(path string) bool {
 	return fileInfo.IsDir()
 }
 
+func CopyFile(src, dest string) error {
+	r, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+	w, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+	_, err = w.ReadFrom(r)
+	return err
+}
+
 func GetMimeType(filePath string) (string, error) {
 	mtype, err := mimetype.DetectFile(filePath)
 	return mtype.String(), err
