@@ -28,7 +28,7 @@ jobs:
 
       - name: Build WpkgUp boot build
         run: |
-          make build GOOS=linux GOARCH=amd64 VERSION=1.0.0-boot 
+          make build GOOS=linux GOARCH=amd64 VERSION=${{ steps.tag_name.outputs.version }}-boot 
           mv wpkgup wpkgup-uploader
           chmod +x wpkgup-uploader
 
@@ -39,18 +39,21 @@ jobs:
 
       - name: Build for Linux x64
         run: |
-          make build GOOS=linux GOARCH=amd64 VERSION=${{ steps.tag_name.outputs.version }} 
+          env GOOS=linux GOARCH=amd64 VERSION=${{ steps.tag_name.outputs.version }} make build 
           mv wpkgup wpkgup-linux-x64
+          file wpkgup-linux-x64
 
       - name: Build for Linux ARM64
         run: |
-          make build GOOS=linux GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} 
+          env GOOS=linux GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} make build
           mv wpkgup wpkgup-linux-arm64
+          file wpkgup-linux-arm64
 
       - name: Build for Windows x64
         run: |
-          make build GOOS=windows GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} 
+          env GOOS=windows GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} make build 
           mv wpkgup.exe wpkgup-windows-x64.exe
+          file wpkgup-windows-x64.exe
 
       - name: Upload for Linux x64
         run: |
