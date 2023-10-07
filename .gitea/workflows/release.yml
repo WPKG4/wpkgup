@@ -26,16 +26,16 @@ jobs:
         with:
           go-version: 1.19
 
-      - name: Build WpkgUp boot build
-        run: |
-          GOOS=linux GOARCH=arm64 VERSION=1.0.0-boot make build
-          mv wpkgup wpkgup-uploader
-          chmod +x wpkgup-uploader
-
-      # - name: Download WpkgUp to upload
+      # - name: Build WpkgUp boot build
       #   run: |
-      #     curl https://cdn.wpkg.dev/api/wpkgup/stable/linux/arm64/latest/getbinary -o wpkgup-uploader
+      #     GOOS=linux GOARCH=arm64 VERSION=1.0.0-boot make build
+      #     mv wpkgup wpkgup-uploader
       #     chmod +x wpkgup-uploader
+
+      - name: Download WpkgUp to upload
+        run: |
+          curl https://cdn.wpkg.dev/api/wpkgup/stable/linux/arm64/latest/getbinary -o wpkgup-uploader
+          chmod +x wpkgup-uploader
 
       - name: Build for Linux x64
         run: |
@@ -67,7 +67,7 @@ jobs:
       - name: Upload for Windows x64
         run: |
           mv wpkgup-windows-x64.exe wpkgup.exe
-          ./wpkgup-uploader upload-binary wpkgup stable linux x64 ${{ steps.tag_name.outputs.version }} wpkgup.exe -i ${{ env.API_URL }} -k ${{ secrets.WPKGUP_KEY }}
+          ./wpkgup-uploader upload-binary wpkgup stable windows x64 ${{ steps.tag_name.outputs.version }} wpkgup.exe -i ${{ env.API_URL }} -k ${{ secrets.WPKGUP_KEY }}
           rm wpkgup.exe
 
       - name: Upload release files
