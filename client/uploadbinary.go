@@ -12,7 +12,24 @@ import (
 	"path/filepath"
 
 	"wpkg.dev/wpkgup/crypto"
+	"wpkg.dev/wpkgup/utils"
 )
+
+var bar utils.Bar
+
+type ProgressReader struct {
+	io.Reader
+	Total   int64
+	Current int64
+}
+
+func (pr *ProgressReader) Read(p []byte) (n int, err error) {
+	n, err = pr.Reader.Read(p)
+	pr.Current += int64(n)
+
+	bar.Play(int64(pr.Current))
+	return
+}
 
 func addToForm(writer *multipart.Writer, name, filep string) error {
 	file, err := os.Open(filep)
@@ -23,7 +40,7 @@ func addToForm(writer *multipart.Writer, name, filep string) error {
 
 	part, err := writer.CreateFormFile(name, file.Name())
 	if err != nil {
-		fmt.Println("Błąd tworzenia formularza pliku:", err)
+		fmt.Println("Error while creating form:", err)
 		return err
 	}
 
@@ -64,7 +81,15 @@ func UploadBinary(component, channel, Os, arch, version, address, filename strin
 
 	writer.Close()
 
-	request, err := http.NewRequest("POST", fmt.Sprintf("%s/api/%s/%s/%s/%s/%s/uploadbinary", address, component, channel, Os, arch, version), &requestBody)
+	progressReader := &ProgressReader{
+		Reader: &requestBody,
+		Total:  int64(requestBody.Len()),
+	}
+
+	//setting progress bar
+	bar.NewOption(0, int64(requestBody.Len()))
+
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/api/%s/%s/%s/%s/%s/uploadbinary", address, component, channel, Os, arch, version), progressReader)
 	if err != nil {
 		return fmt.Errorf("http error: %s", err)
 	}
@@ -78,6 +103,9 @@ func UploadBinary(component, channel, Os, arch, version, address, filename strin
 		return fmt.Errorf("http request error: %s", err)
 	}
 	defer resp.Body.Close()
+
+	//end progress bar
+	bar.Finish()
 
 	if resp.StatusCode != 201 {
 		var m map[string]interface{}

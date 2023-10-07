@@ -257,6 +257,7 @@ func main() {
 			os.Exit(1)
 		}
 
+		fmt.Println("Uploading binary...")
 		err = client.UploadBinary(component, channel, Os, arch, version, address, filename, privateKey)
 		if err != nil {
 			fmt.Println(err)
