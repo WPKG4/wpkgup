@@ -211,7 +211,7 @@ func UploadBinary(c *gin.Context) {
 		jsonMap := VersionJson{
 			Version:  version,
 			Checksum: checksum,
-			Url:      "/" + component + "/" + channel + "/" + Os + "/" + arch + "/" + version + "/version.json",
+			Url:      "/" + component + "/" + channel + "/" + Os + "/" + arch + "/" + version + "/" + file.Filename,
 		}
 
 		//Generate JSON
@@ -224,7 +224,13 @@ func UploadBinary(c *gin.Context) {
 		c.Status(http.StatusCreated)
 	} else {
 		log.Println("Sign is not valid, removing files...")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Sign is not valid"})
+		err := os.RemoveAll(savePath)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Sign is not valid"})
+		}
 	}
 }
 

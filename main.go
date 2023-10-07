@@ -19,7 +19,7 @@ import (
 var initFlag, serverFlag, genFlag, importKeysFlag, uploadKeysFlag, signBinaryFlag, uploadBinaryFlag *flag.FlagSet
 
 func help(argv0 string) {
-	fmt.Fprintln(os.Stderr, "\nWPKG update manager")
+	fmt.Fprintln(os.Stderr, "\nWPKG Update Manager")
 	fmt.Fprintln(os.Stderr, "\nUsage: "+argv0+" <command> [command options]")
 	fmt.Fprintln(os.Stderr, "\nCommands:")
 	fmt.Fprintln(os.Stderr, "\nserver - starting server")
@@ -30,8 +30,8 @@ func help(argv0 string) {
 	importKeysFlag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "\nupload-keys - upload keys to server")
 	uploadKeysFlag.PrintDefaults()
-	fmt.Fprintln(os.Stderr, "\nsign-binary <binary to sign> <sign file output> - Sign binary")
-	fmt.Fprintln(os.Stderr, "\nupload-binary <component> <channel> <os> <arch> <version> <filename> - Upload binary to server binary")
+	fmt.Fprintln(os.Stderr, "\nsign-binary <binary to sign> <sign file output> [flags] - Sign binary")
+	fmt.Fprintln(os.Stderr, "\nupload-binary <component> <channel> <os> <arch> <version> <filename> [flags] - Upload binary to server binary")
 	uploadBinaryFlag.PrintDefaults()
 }
 
@@ -78,7 +78,7 @@ func main() {
 	var address, password string
 
 	uploadKeysFlag = flag.NewFlagSet("upload-keys", flag.ExitOnError)
-	uploadKeysFlag.StringVar(&address, "i", "0.0.0.0:8080", "Server Address")
+	uploadKeysFlag.StringVar(&address, "i", "http://localhost:8080", "Server Address")
 	uploadKeysFlag.StringVar(&password, "p", "", "Server Password")
 	uploadKeysFlag.StringVar(&workDir, "w", config.FindAppDataFolder("wpkgup2"), "Server workdir")
 
@@ -86,7 +86,7 @@ func main() {
 	signBinaryFlag.StringVar(&workDir, "w", config.FindAppDataFolder("wpkgup2"), "Server workdir")
 
 	uploadBinaryFlag = flag.NewFlagSet("upload-binary", flag.ExitOnError)
-	uploadBinaryFlag.StringVar(&address, "i", "0.0.0.0:8080", "Server Address")
+	uploadBinaryFlag.StringVar(&address, "i", "http://localhost:8080", "Server Address")
 	uploadBinaryFlag.StringVar(&workDir, "w", config.FindAppDataFolder("wpkgup2"), "Server workdir")
 	uploadBinaryFlag.StringVar(&keyString, "k", "", "Private key to import")
 
@@ -199,7 +199,13 @@ func main() {
 		}
 		fmt.Println("Keys uploaded successfully!")
 	case "sign-binary":
-		signBinaryFlag.Parse(os.Args[2:])
+		if len(os.Args) > 4 {
+			signBinaryFlag.Parse(os.Args[5:])
+		}
+		if len(os.Args) < 4 {
+			fmt.Fprintln(os.Stderr, "Missing argument")
+			break
+		}
 		config.InitDirs(workDir)
 
 		binaryFilePath := os.Args[2]
@@ -222,7 +228,13 @@ func main() {
 			os.Exit(1)
 		}
 	case "upload-binary":
-		uploadBinaryFlag.Parse(os.Args[7:])
+		if len(os.Args) > 7 {
+			uploadBinaryFlag.Parse(os.Args[8:])
+		}
+		if len(os.Args) < 7 {
+			fmt.Fprintln(os.Stderr, "Missing argument")
+			break
+		}
 		config.InitDirs(workDir)
 
 		component := os.Args[2]
@@ -234,8 +246,6 @@ func main() {
 
 		var privateKey *ecdsa.PrivateKey
 		var err error
-
-		fmt.Println(keyString)
 
 		if keyString != "" {
 			privateKey, err = crypto.ParsePrivateKeyFromString(keyString)

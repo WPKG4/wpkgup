@@ -11,7 +11,7 @@ import (
 )
 
 func UploadKey(address, password string) error {
-	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%s/api/keys/add", address), nil)
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/keys/add", address), nil)
 	if err != nil {
 		return err
 	}

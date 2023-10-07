@@ -44,7 +44,6 @@ func generateSign(privateKey *ecdsa.PrivateKey, filename, output string) error {
 }
 
 func UploadBinary(component, channel, Os, arch, version, address, filename string, privateKey *ecdsa.PrivateKey) error {
-
 	temp, err := os.MkdirTemp("", "wpkgup2_*")
 	if err != nil {
 		return fmt.Errorf("mkdir temp error: %s", err)
@@ -65,9 +64,8 @@ func UploadBinary(component, channel, Os, arch, version, address, filename strin
 
 	writer.Close()
 
-	request, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/%s/%s/%s/%s/%s/uploadbinary", address, component, channel, Os, arch, version), &requestBody)
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/api/%s/%s/%s/%s/%s/uploadbinary", address, component, channel, Os, arch, version), &requestBody)
 	if err != nil {
-
 		return fmt.Errorf("http error: %s", err)
 	}
 

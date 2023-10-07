@@ -2,6 +2,7 @@ package keystore
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -54,11 +55,25 @@ func readJson(path string) (AuthorizedKeys, error) {
 	return authorizedKeys, nil
 }
 
+func containsElement(arr []string, elementToFind string) bool {
+	for _, element := range arr {
+		if element == elementToFind {
+			return true
+		}
+	}
+	return false
+}
+
 func AddKey(key string) error {
 	keys, err := readJson(KeystorePath)
 	if err != nil {
 		return err
 	}
+
+	if containsElement(keys.Keys, key) {
+		return fmt.Errorf("this key is already authorized")
+	}
+
 	keys.Keys = append(keys.Keys, key)
 
 	_, err = crypto.ParsePublicKeyFromString(key)

@@ -1,4 +1,4 @@
-VERSION=0.0.1-alpha1
+VERSION=1.0.0
 
 LDFLAGS = -X wpkg.dev/wpkgup/config.Version=$(VERSION)
 
@@ -13,5 +13,4 @@ build:
 	go build \
 		-v \
 		-ldflags '$(LDFLAGS)' \
-		-o wpkgup \
 		.
