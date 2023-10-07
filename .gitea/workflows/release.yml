@@ -23,8 +23,41 @@ jobs:
         with:
           go-version: '>=1.20.1'
 
-      - name: Build for Linux AMD64
-        run: GOOS=linux GOARCH=amd64 make build
+      - name: Download WpkgUp to upload
+        run: curl https://cdn.wpkg.dev/api/wpkgup/stable/linux/arm64/latest/getbinary -o wpkgup-uploader
+
+      - name: Build for Linux x64
+        run: |
+          GOOS=linux GOARCH=amd64 VERSION=${{ steps.tag_name.outputs.version }} make build
+          mv wpkgup wpkgup-linux-x64
+
+      - name: Build for Linux ARM64
+        run: |
+          GOOS=linux GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} make build
+          mv wpkgup wpkgup-linux-arm64
+
+      - name: Build for Windows x64
+        run: |
+          GOOS=windows GOARCH=arm64 VERSION=${{ steps.tag_name.outputs.version }} make build
+          mv wpkgup.exe wpkgup-windows-x64.exe
+
+      - name: Upload for Linux x64
+        run: |
+          mv wpkgup-linux-x64 wpkgup
+          ./wpkgup-uploader upload-binary wpkgup stable linux x64 ${{ steps.tag_name.outputs.version }} wpkgup -k ${{ secrets.WPKGUP_KEY }}
+          rm wpkgup
+
+      - name: Upload for Linux ARM64
+        run: |
+          mv wpkgup-linux-arm64 wpkgup
+          ./wpkgup-uploader upload-binary wpkgup stable linux arm64 ${{ steps.tag_name.outputs.version }} wpkgup -k ${{ secrets.WPKGUP_KEY }}
+          rm wpkgup
+
+      - name: Upload for Windows x64
+        run: |
+          mv wpkgup-windows-x64.exe wpkgup.exe
+          ./wpkgup-uploader upload-binary wpkgup stable linux x64 ${{ steps.tag_name.outputs.version }} wpkgup.exe -k ${{ secrets.WPKGUP_KEY }}
+          rm wpkgup.exe
 
       - name: Upload release files
         uses: https://gitea.com/actions/release-action@main
