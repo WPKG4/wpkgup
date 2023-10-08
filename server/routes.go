@@ -156,8 +156,10 @@ func GetBinary(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	binaryPath := filepath.Join(config.WorkDir, config.ContentDir, jsonMap.Path)
+	absWorkDir, _ := filepath.Abs(config.WorkDir)
+	binaryPath := filepath.Join(absWorkDir, config.ContentDir, jsonMap.Path)
 
+	log.Println("Binary path is:", binaryPath)
 	c.File(binaryPath)
 }
 
